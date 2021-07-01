@@ -181,14 +181,12 @@ export default {
       })
     },
     login(){
-      console.log('loading => ', this.loading);
       this.formError.message = false;
       this.emailError.status = false;
       this.showPasswordError.status = false;
       if(!(!this.validateEmail() || !this.validatePassword())){
         this.loading = true;
         this.userCredentials.password = this.selectedPswdImg;
-        console.log('signup successful')
         axios
             .post('/user/login', this.userCredentials)
             .then((resp)=>{

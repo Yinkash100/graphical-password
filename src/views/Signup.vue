@@ -195,11 +195,9 @@ export default {
       if(!(!this.validateUsername() || !this.validateEmail() || !this.validatePassword())){
         this.loading = true
         this.userCredentials.password = this.selectedPswdImg;
-        console.log('signup successful')
         axios
             .post('/user', this.userCredentials)
             .then((resp)=>{
-              console.log('resp => ', resp)
               this.userCredentials.email = ''
               this.userCredentials.password = ''
               this.selectedPswdImg = []
@@ -214,9 +212,7 @@ export default {
                 this.formError.status = true
                 this.loading = false
                 window.scroll(0,0)
-
                }
-              console.log(err)
             })
       }
     },

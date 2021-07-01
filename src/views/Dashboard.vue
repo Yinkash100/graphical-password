@@ -15,7 +15,6 @@ export default {
   name: "Dashboard",
   methods: {
     logout() {
-      console.log('logged out')
       this.$router.push('/login')
       this.$cookies.remove('username')
     }

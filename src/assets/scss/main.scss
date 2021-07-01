@@ -1,0 +1,55 @@
+@import "abstract/variables";
+@import "abstract/mixins";
+
+@import "base/animations";
+@import "base/utilities";
+
+@import "components/button";
+@import "components/forms";
+
+
+
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+html{
+}
+
+body{
+  margin: 0 auto;
+  font-family: 'Roboto', sans-serif;
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+li{
+  list-style-type: none;
+}
+
+
+
+.error, .errorMessage {
+  color: $color-warning;
+  margin-left: 1rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+.content {
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}

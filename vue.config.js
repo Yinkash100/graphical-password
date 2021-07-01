@@ -5,8 +5,5 @@ module.exports = {
         additionalData: `@import "@/assets/scss/main.scss";`
       }
     }
-  },
-  publicPath: process.env.NODE_ENV === 'production'
-      ? '/graphical-password/'
-      : '/'
+  }
 };

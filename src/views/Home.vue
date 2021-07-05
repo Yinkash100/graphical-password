@@ -14,7 +14,12 @@
 
 <script>
 export default {
-  name: 'Home'
+  name: 'Home',
+  beforeMount(){
+    if(this.$cookies.get('username')){
+      this.$router.push('/dashboard')
+    }
+  }
 }
 </script>
 

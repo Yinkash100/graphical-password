@@ -3,45 +3,64 @@
     <div v-if="loading" class="loader">
       <Loader />
     </div>
-    <div class="signup">
-      <form class="form" @submit.prevent="login">
-        <h1>Login</h1>
-        <div v-if="formError.status" class="form__error">
-          <img src="/icons/alarm.png" alt="">
-          {{  formError.message }}
-        </div>
-        <div class="form__group">
-          <label for="email" class="form__label">Email</label>
-          <input v-model="userCredentials.email" id="email" type="text"  class="form__input" placeholder="Email">
-          <div v-if="emailError.status" class="errorMessage">{{ emailError.error }}</div>
-        </div>
-        <div class="form__group u-margin-top-small">
-          <div class="u-bold-text">Please select three images in order that you'll remember.</div>
-          <div class="u-bold-text">This would be your graphical password</div>
-          <div class="form__group img-pswd">
-            <div v-for="(img, index) in passwordImageList" :key="index" class="img-pswd-main">
-              <button v-if="img.selected === true" class="btn btn-close" @click="clickImage(img)"> x </button>
-              <p v-if="img.position != 0" class="click-counter">{{ img.position }}</p>
-              <img
-                  :src="`/images/${img.name}`"
-                  class="img-main-img"
-                  :class="img.selected ? 'img-unclickable': 'img-clickable'"
-                  @click="clickImage(img)">
+    <div v-if="showOTPScreen" class="otp-screen">
+        <div class="signup">
+          <div v-if="otpError.status" class="form__error">
+            <img src="/icons/alarm.png" alt="">
+            {{  otpError.message }}
+          </div>
+          <h4 class="opt-head">Please enter the OTP sent to {{ loggedUserDetails.email }} to continue</h4>
+          <div class="form__group">
+            <label for="otp" class="form__label">OTP</label>
+            <input v-model="userOTP" id="otp" type="number"  class="form__input" placeholder="OTP">
+            <div v-if="otpValError.status" class="errorMessage">
+              {{ otpValError.error }}
             </div>
           </div>
-          <div ref="pswd-error1" v-if="showPasswordError.status && showPasswordError.error === 'incomplete-image'" class="errorMessage">
-            Please select three images as password
-          </div>
-          <div ref="pswd-error2" v-if="showPasswordError.status && showPasswordError.error === 'complete-image'" class="errorMessage">
-            You can only select three images
-            <br>To select a new image, please unselect some first
+          <div class="form__group u-align-right">
+            <button class="btn btn-secondary" @click="confirmOTP">Continue</button>
           </div>
         </div>
-        <div class="form__group u-align-right">
-          <button class="btn btn-secondary">Login</button>
-        </div>
-      </form>
-      Have no account yet? <router-link to="/signup">Sign up</router-link>
+    </div>
+    <div class="signup">
+        <form class="form" @submit.prevent="login">
+          <h1>Login</h1>
+          <div v-if="formError.status" class="form__error">
+            <img src="/icons/alarm.png" alt="">
+            {{  formError.message }}
+          </div>
+          <div class="form__group">
+            <label for="email" class="form__label">Email</label>
+            <input v-model="userCredentials.email" id="email" type="text"  class="form__input" placeholder="Email">
+            <div v-if="emailError.status" class="errorMessage">{{ emailError.error }}</div>
+          </div>
+          <div class="form__group u-margin-top-small">
+            <div class="u-bold-text">Please select three images in order that you'll remember.</div>
+            <div class="u-bold-text">This would be your graphical password</div>
+            <div class="form__group img-pswd">
+              <div v-for="(img, index) in passwordImageList" :key="index" class="img-pswd-main">
+                <button v-if="img.selected === true" class="btn btn-close" @click="clickImage(img)"> x </button>
+                <p v-if="img.position != 0" class="click-counter">{{ img.position }}</p>
+                <img
+                    :src="`/images/${img.name}`"
+                    class="img-main-img"
+                    :class="img.selected ? 'img-unclickable': 'img-clickable'"
+                    @click="clickImage(img)">
+              </div>
+            </div>
+            <div ref="pswd-error1" v-if="showPasswordError.status && showPasswordError.error === 'incomplete-image'" class="errorMessage">
+              Please select three images as password
+            </div>
+            <div ref="pswd-error2" v-if="showPasswordError.status && showPasswordError.error === 'complete-image'" class="errorMessage">
+              You can only select three images
+              <br>To select a new image, please unselect some first
+            </div>
+          </div>
+          <div class="form__group u-align-right">
+            <button class="btn btn-secondary">Login</button>
+          </div>
+        </form>
+        Have no account yet? <router-link to="/signup">Sign up</router-link>
     </div>
 
   </div>
@@ -134,7 +153,15 @@ export default {
       formError: {
         status: false,
         message: ''
-      }
+      },
+      showOTPScreen: false,
+      loggedUserDetails: {
+        email: '',
+        name: ''
+      },
+      userOTP: null,
+      otpError: {status:false, message: ''},
+      otpValError: {status:false, message: ''}
     }
   },
   beforeMount(){
@@ -193,8 +220,10 @@ export default {
               this.userCredentials.email = ''
               this.userCredentials.password = ''
               this.selectedPswdImg = []
-              this.$cookies.set('username', resp.data.user.username)
-              this.$router.push('/dashboard')
+              this.loggedUserDetails = resp.data.user
+              this.showOTPScreen = true
+              this.loading = false
+
 
             })
             .catch(err => {
@@ -208,6 +237,47 @@ export default {
             });
       }
 
+    },
+    confirmOTP(){
+      this.otpValError.status = false;
+      if(this.validateOTP()) {
+        this.loading = true
+        axios
+            .post('/user/confirmOTP', {user: this.loggedUserDetails, otp: this.userOTP})
+            .then((resp)=>{
+              this.userOTP = ''
+              this.$cookies.set('username', resp.data.user.username)
+              this.loggedUserDetails = resp.data.user
+              this.$router.push('/dashboard')
+            })
+            .catch(err => {
+              if(err.response.status === 403){
+                this.otpError.message = "Incorrect OTP"
+              }
+              else {
+                this.otpError.message = "Server Error"
+              }
+              console.log(err)
+              this.otpError.status = true
+              window.scroll(0,0)
+              this.loading = false;
+            })
+
+      }
+      else {
+        this.otpValError = {
+          status: true,
+          error: 'OTP must be a six digit number'
+        }
+      }
+    },
+    validateOTP(){
+      if(this.userOTP && this.userOTP.toString().length === 6) {
+        return true
+      }
+      else{
+        return false
+      }
     },
     validateEmail(){
       if(this.userCredentials.email === ''){
@@ -226,8 +296,6 @@ export default {
           return false
         }
       }
-
-
     },
     validatePassword() {
       if(this.selectedPswdImg.length === 3){
@@ -245,7 +313,7 @@ export default {
 
 <style lang="scss" scoped>
 .container{
-  padding: 10px;
+  // padding: 10px;
 }
 
 .signup{
@@ -254,6 +322,7 @@ export default {
   margin: 40px auto;
   border: 1px solid $color-grey;
   border-radius: 25px;
+  background: $color-white;
   @include respond(tab-port){
     padding:20px 10px;
     margin: 20px auto;
@@ -342,5 +411,29 @@ h1 {
 }
 .u-margin-top-small {
   margin-top: 20px;
+}
+.opt-head {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.otp-screen {
+  background: rgba(0,0,0, 0.75);
+  position: fixed;
+  top:0;
+  left: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  .signup {
+    width: 80%;
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    @include respond(tab-port){
+      width: 95%;
+    }
+  }
 }
 </style>

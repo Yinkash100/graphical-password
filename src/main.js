@@ -1,7 +1,7 @@
 import axios from 'axios'
 window.axios = axios
-axios.defaults.baseURL = 'https://graphical-password-be.herokuapp.com/'
-// axios.defaults.baseURL = 'http://127.0.0.1:3000/'
+// axios.defaults.baseURL = 'https://graphical-password-be.herokuapp.com/'
+axios.defaults.baseURL = 'http://127.0.0.1:3000/'
 
 
 import { createApp } from 'vue'

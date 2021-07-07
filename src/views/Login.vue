@@ -9,7 +9,7 @@
             <img src="/icons/alarm.png" alt="">
             {{  otpError.message }}
           </div>
-          <h4 class="opt-head">Please enter the OTP sent to {{ loggedUserDetails.email }} to continue</h4>
+          <h4 class="opt-head">Please enter the OTP sent to {{ hideDetails(loggedUserDetails.email) }} and {{ hideDetails(loggedUserDetails.phone) }} to continue</h4>
           <div class="form__group">
             <label for="otp" class="form__label">OTP</label>
             <input v-model="userOTP" id="otp" type="number"  class="form__input" placeholder="OTP">
@@ -306,6 +306,16 @@ export default {
         this.showPasswordError.error = 'complete-image'
         return false
       }
+    },
+    hideDetails(text){
+      if(text.includes('@')){
+        const newTextArr = text.split('@');
+        return newTextArr[0].substring(0,3) + '*****' +'@' + newTextArr[1]
+      }
+      else {
+        return text.substring(0, 4) +'*****' + text.substring(text.length - 2)
+      }
+
     }
   }
 }

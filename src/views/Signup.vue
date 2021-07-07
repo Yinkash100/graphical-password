@@ -20,6 +20,11 @@
           <input v-model="userCredentials.email" id="email" type="text"  class="form__input" placeholder="Email">
           <div v-if="emailError.status" class="errorMessage">{{ emailError.error }}</div>
         </div>
+        <div class="form__group">
+          <label for="phone-number" class="form__label">Phone Number</label>
+          <input v-model="userCredentials.phone" id="phone-number" type="text"  class="form__input" placeholder="Phone Number">
+          <div v-if="phoneError.status" class="errorMessage">{{ phoneError.error }}</div>
+        </div>
         <div class="form__group  u-margin-top-small">
           <div class="u-bold-text">Please select three images in order that you'll remember.</div>
           <div class="u-bold-text">This would be your graphical password</div>
@@ -62,7 +67,8 @@ export default {
     return {
       userCredentials: {
         username: '',
-        email: ''
+        email: '',
+        phone: '',
       },
       loading: false,
       passwordCompleted: false,
@@ -137,6 +143,10 @@ export default {
         status: false,
         error: ''
       },
+      phoneError: {
+        status: false,
+        error: ''
+      },
       formError: {
         status: false,
         message: ''
@@ -187,14 +197,15 @@ export default {
       })
     },
     signup(){
-
       this.formError.message = false
       this.usernameError.status = false;
       this.emailError.status = false;
+      this.phoneError.status = false;
       this.showPasswordError.status = false;
-      if(!(!this.validateUsername() || !this.validateEmail() || !this.validatePassword())){
+      if(!(!this.validateUsername() || !this.validateEmail() || !this.validatePhone() || !this.validatePassword())){
         this.loading = true
         this.userCredentials.password = this.selectedPswdImg;
+        // console.log('User Credentials', this.userCredentials)
         axios
             .post('/user', this.userCredentials)
             .then((resp)=>{
@@ -214,6 +225,7 @@ export default {
                 window.scroll(0,0)
                }
             })
+
       }
     },
     validateUsername(){
@@ -243,8 +255,15 @@ export default {
          return false
        }
       }
-
-
+    },
+    validatePhone () {
+      if(this.userCredentials.phone === '' || this.userCredentials.phone.toString().length < 11){
+        this.phoneError.status = true
+        this.phoneError.error = "Invalid Phone Number"
+        return false
+      }else {
+        return true;
+      }
     },
     validatePassword() {
       if(this.selectedPswdImg.length === 3){
